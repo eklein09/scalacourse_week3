@@ -104,6 +104,8 @@ abstract class TweetSet {
    * This method takes a function and applies it to every element in the set.
    */
   def foreach(f: Tweet => Unit): Unit
+
+  def get: Tweet
 }
 
 class Empty extends TweetSet {
@@ -134,10 +136,14 @@ class Empty extends TweetSet {
     * and be implemented in the subclasses?
     */
   override def descendingByRetweet: TweetList = Nil
+
+  override def get: Tweet = throw new NoSuchElementException
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
+
+  override def get: Tweet = elem
 
   /**
     * Returns a list containing all tweets of this set, sorted by retweet count
@@ -150,7 +156,17 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     */
   override def descendingByRetweet: TweetList = new Cons(this.mostRetweeted, this.remove(this.mostRetweeted).descendingByRetweet)
 
-  def union(that: TweetSet): TweetSet = ((left union that) union right) incl elem
+  def union(that: TweetSet): TweetSet = {
+    try {
+      val topTweet = that.get
+      (this incl topTweet) union (that remove topTweet)
+    }
+    catch {
+      case x: NoSuchElementException => this
+    }
+  }
+
+
    def mostRetweeted: Tweet = {
 
      val leftRetweets : Int = {
