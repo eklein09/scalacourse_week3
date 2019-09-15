@@ -76,7 +76,7 @@ abstract class TweetSet {
    * Question: Should we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def descendingByRetweet: TweetList = ???
+    def descendingByRetweet: TweetList
 
   /**
    * The following methods are already implemented
@@ -123,9 +123,47 @@ class Empty extends TweetSet {
   def foreach(f: Tweet => Unit): Unit = ()
 
   def mostRetweeted: Tweet = throw new NoSuchElementException
+
+  /**
+    * Returns a list containing all tweets of this set, sorted by retweet count
+    * in descending order. In other words, the head of the resulting list should
+    * have the highest retweet count.
+    *
+    * Hint: the method `remove` on TweetSet will be very useful.
+    * Question: Should we implment this method here, or should it remain abstract
+    * and be implemented in the subclasses?
+    */
+  override def descendingByRetweet: TweetList = Nil
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
+
+
+  /**
+    * Returns a list containing all tweets of this set, sorted by retweet count
+    * in descending order. In other words, the head of the resulting list should
+    * have the highest retweet count.
+    *
+    * Hint: the method `remove` on TweetSet will be very useful.
+    * Question: Should we implment this method here, or should it remain abstract
+    * and be implemented in the subclasses?
+    */
+  override def descendingByRetweet: TweetList = {
+    def descendingByRetweetAccum(accum: TweetList, s: TweetSet): (TweetList, TweetSet) = {
+      try {
+        val mrt = s.mostRetweeted
+        (accum.incl(mrt), s.remove(mrt))
+
+      }
+      catch
+        {
+          case x: NoSuchElementException => (accum, new Empty)
+        }
+    }
+    val (finalList, finalSet) = descendingByRetweetAccum(Nil, this)
+    finalList
+  }
+
   def union(that: TweetSet): TweetSet = ((left union right) union that) incl elem
    def mostRetweeted: Tweet = {
      try
@@ -185,16 +223,21 @@ trait TweetList {
       f(head)
       tail.foreach(f)
     }
+  def incl(tweet: Tweet): TweetList
 }
 
 object Nil extends TweetList {
   def head = throw new java.util.NoSuchElementException("head of EmptyList")
   def tail = throw new java.util.NoSuchElementException("tail of EmptyList")
   def isEmpty = true
+
+  override def incl(tweet: Tweet): TweetList = new Cons(tweet, Nil)
 }
 
 class Cons(val head: Tweet, val tail: TweetList) extends TweetList {
   def isEmpty = false
+
+  override def incl(tweet: Tweet): TweetList = new Cons(this.head, this.tail.incl(tweet))
 }
 
 
