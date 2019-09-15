@@ -68,6 +68,10 @@ class TweetSetSuite extends FunSuite {
   test("mostRetweeted") {
     new TestSets {
       assert(set6.mostRetweeted.retweets === 25)
+      assert(set2.mostRetweeted.retweets === 20)
+      assert(set3.mostRetweeted.retweets === 20)
+      assert(set4c.mostRetweeted.retweets === 20)
+      assert(set4d.mostRetweeted.retweets === 20)
     }
   }
 

@@ -148,32 +148,41 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     * Question: Should we implment this method here, or should it remain abstract
     * and be implemented in the subclasses?
     */
-  override def descendingByRetweet: TweetList = {
-    def descendingByRetweetAccum(accum: TweetList, s: TweetSet): (TweetList, TweetSet) = {
-      try {
-        val mrt = s.mostRetweeted
-        (accum.incl(mrt), s.remove(mrt))
-
-      }
-      catch
-        {
-          case x: NoSuchElementException => (accum, new Empty)
-        }
-    }
-    val (finalList, finalSet) = descendingByRetweetAccum(Nil, this)
-    finalList
-  }
+  override def descendingByRetweet: TweetList = new Cons(this.mostRetweeted, this.remove(this.mostRetweeted).descendingByRetweet)
 
   def union(that: TweetSet): TweetSet = ((left union right) union that) incl elem
    def mostRetweeted: Tweet = {
-     try
-     {
-       right.mostRetweeted
-     }
-     catch
+
+     val leftRetweets : Int = {
+       try
        {
-         case x: NoSuchElementException => elem
+         left.mostRetweeted.retweets
        }
+       catch
+         {
+           case x: NoSuchElementException => 0
+         }
+     }
+
+     val rightRetweets : Int = {
+       try
+       {
+         right.mostRetweeted.retweets
+       }
+       catch
+         {
+           case x: NoSuchElementException => 0
+         }
+     }
+
+    if ((leftRetweets > elem.retweets) && (leftRetweets >= rightRetweets))
+      left.mostRetweeted
+    else if ((rightRetweets > elem.retweets) && (rightRetweets >= leftRetweets))
+      right.mostRetweeted
+     else
+      elem
+
+
    }
     def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
       if (p(elem)) {
