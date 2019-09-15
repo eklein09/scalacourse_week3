@@ -159,7 +159,13 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   def union(that: TweetSet): TweetSet = {
     try {
       val topTweet = that.get
-      (this incl topTweet) union (that remove topTweet)
+      if (this contains topTweet)
+        {
+          this union (that remove topTweet)
+        }
+      else {
+        (this incl topTweet) union (that remove topTweet)
+      }
     }
     catch {
       case x: NoSuchElementException => this
