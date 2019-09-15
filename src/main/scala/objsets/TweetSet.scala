@@ -106,6 +106,8 @@ abstract class TweetSet {
   def foreach(f: Tweet => Unit): Unit
 
   def get: Tweet
+
+  def getLeft: Tweet
 }
 
 class Empty extends TweetSet {
@@ -138,12 +140,26 @@ class Empty extends TweetSet {
   override def descendingByRetweet: TweetList = Nil
 
   override def get: Tweet = throw new NoSuchElementException
+
+  override def getLeft: Tweet = throw new NoSuchElementException
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
 
   override def get: Tweet = elem
+
+
+  override def getLeft: Tweet = {
+    try
+    {
+      left.getLeft
+    }
+    catch
+      {
+        case x: NoSuchElementException => elem
+      }
+  }
 
   /**
     * Returns a list containing all tweets of this set, sorted by retweet count
@@ -158,7 +174,7 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
   def union(that: TweetSet): TweetSet = {
     try {
-      val topTweet = that.get
+      val topTweet = that.getLeft
       if (this contains topTweet)
         {
           this union (that remove topTweet)
