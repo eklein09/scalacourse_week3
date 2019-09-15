@@ -127,7 +127,16 @@ class Empty extends TweetSet {
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   def union(that: TweetSet): TweetSet = ((left union right) union that) incl elem
-   def mostRetweeted: Tweet = ???
+   def mostRetweeted: Tweet = {
+     try
+     {
+       right.mostRetweeted
+     }
+     catch
+       {
+         case x: NoSuchElementException => elem
+       }
+   }
     def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
       if (p(elem)) {
         val set = acc.incl(elem)
